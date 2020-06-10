@@ -17,7 +17,5 @@ func NewCobraCmd() *cobra.Command {
 		},
 	}
 
-
-
 	return cmd
 }

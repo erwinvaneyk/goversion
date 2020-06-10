@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
 
-	"github.com/erwinvaneyk/go-version/extensions"
+	"github.com/erwinvaneyk/go-version/pkg/extensions"
 )
 
-func NewCmdRoot() *cobra.Command {
+func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "goversion",
 		Short: "Generate linker flags and fields for versioning",
@@ -17,4 +18,8 @@ func NewCmdRoot() *cobra.Command {
 	cmd.AddCommand(extensions.NewCobraCmd())
 
 	return cmd
+}
+
+func Execute() {
+	cobras.Execute(New())
 }

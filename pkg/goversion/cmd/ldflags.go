@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
 	"time"
 
+	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
 
 	"github.com/erwinvaneyk/go-version"
@@ -23,13 +25,7 @@ func NewCmdLDFlags() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "ldflags",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := opts.Complete(args)
-			if err != nil {
-				return err
-			}
-			return opts.Run()
-		},
+		Run: cobras.Run(opts),
 	}
 
 	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "")
@@ -40,7 +36,7 @@ func NewCmdLDFlags() *cobra.Command {
 	return cmd
 }
 
-func (o *LDFlagsOptions) Complete(args []string) error {
+func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Infer build by
 	if o.Version.BuildBy == "" {
 		out, err := exec.Command("git", "config", "user.name").CombinedOutput()
@@ -108,7 +104,11 @@ func (o *LDFlagsOptions) Complete(args []string) error {
 	return nil
 }
 
-func (o *LDFlagsOptions) Run() error {
+func (o *LDFlagsOptions) Validate() error {
+	return nil
+}
+
+func (o *LDFlagsOptions) Run(ctx context.Context) error {
 	fmt.Printf("-ldflags '%s'", o.Version.GenerateLDFlags(o.PackageName))
 
 	return nil

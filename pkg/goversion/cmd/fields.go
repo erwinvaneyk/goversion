@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"text/template"
 
+	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
 
 	goversion "github.com/erwinvaneyk/go-version"
@@ -30,9 +32,7 @@ func NewCmdFields() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "fields",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return opts.Run()
-		},
+		Run: cobras.Run(opts),
 	}
 
 	cmd.Flags().StringVarP(&opts.GeneratedFilePath, "output", "o", opts.GeneratedFilePath, "")
@@ -42,7 +42,15 @@ func NewCmdFields() *cobra.Command {
 	return cmd
 }
 
-func (o *FieldsOptions) Run() error {
+func (o *FieldsOptions) Complete(cmd *cobra.Command, args []string) error {
+	return nil
+}
+
+func (o *FieldsOptions) Validate() error {
+	return nil
+}
+
+func (o *FieldsOptions) Run(ctx context.Context) error {
 	var writesToFile bool
 	var writer io.Writer
 	if o.GeneratedFilePath == "" || o.GeneratedFilePath == "-" {

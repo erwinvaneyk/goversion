@@ -151,7 +151,7 @@ line to the setup of your root command:
 
 ```go
 import (
-	"github.com/erwinvaneyk/go-version/versionext"
+	"github.com/erwinvaneyk/go-version/pkg/extensions"
 )
 
 func init() {

@@ -63,21 +63,6 @@ func (i Info) ToPrettyJson() string {
 	return string(bs)
 }
 
-func Set(updatedVersion Info) {
-	if updatedVersion.IsEmpty() {
-		return
-	}
-	versionInfoMu.Lock()
-	defer versionInfoMu.Unlock()
-	versionInfo = updatedVersion
-}
-
-func Get() Info {
-	versionInfoMu.RLock()
-	defer versionInfoMu.RUnlock()
-	return versionInfo
-}
-
 func (i Info) GenerateLDFlags(pkg string) string {
 	var flags string
 	if i.BuildBy != "" {
@@ -109,4 +94,19 @@ func (i Info) GenerateLDFlags(pkg string) string {
 
 func generateLDFlag(pkg string, field string, val string) string {
 	return fmt.Sprintf("-X \"%s.%s=%s\"", pkg, field, val)
+}
+
+func Set(updatedVersion Info) {
+	if updatedVersion.IsEmpty() {
+		return
+	}
+	versionInfoMu.Lock()
+	defer versionInfoMu.Unlock()
+	versionInfo = updatedVersion
+}
+
+func Get() Info {
+	versionInfoMu.RLock()
+	defer versionInfoMu.RUnlock()
+	return versionInfo
 }
