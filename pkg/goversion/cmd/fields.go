@@ -11,7 +11,7 @@ import (
 	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
 
-	goversion "github.com/erwinvaneyk/go-version"
+	"github.com/erwinvaneyk/goversion"
 )
 
 type FieldsOptions struct {

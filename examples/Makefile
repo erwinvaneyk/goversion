@@ -10,9 +10,9 @@ simple:
 simple-manual:
 	@echo "[simple-manual]"
 	go run -ldflags ' \
-		-X "github.com/erwinvaneyk/go-version.version=v1.0.0" \
-		-X "github.com/erwinvaneyk/go-version.gitCommit=$(shell git rev-parse HEAD)" \
-		-X "github.com/erwinvaneyk/go-version.buildDate=$(shell date)"' \
+		-X "github.com/erwinvaneyk/goversion.version=v1.0.0" \
+		-X "github.com/erwinvaneyk/goversion.gitCommit=$(shell git rev-parse HEAD)" \
+		-X "github.com/erwinvaneyk/goversion.buildDate=$(shell date)"' \
 	    ./simple
 
 .PHONY: generated

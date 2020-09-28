@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	goversion "github.com/erwinvaneyk/go-version"
+	"github.com/erwinvaneyk/goversion"
 )
 
 func main() {

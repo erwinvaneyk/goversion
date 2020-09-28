@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/erwinvaneyk/go-version"
+	"github.com/erwinvaneyk/goversion"
 )
 
 func NewCobraCmd() *cobra.Command {
@@ -13,7 +13,7 @@ func NewCobraCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print version information.",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(version.Get().ToPrettyJson())
+			fmt.Println(goversion.Get().ToPrettyJson())
 		},
 	}
 

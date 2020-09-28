@@ -4,7 +4,7 @@ import (
 	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
 
-	"github.com/erwinvaneyk/go-version/pkg/extensions"
+	"github.com/erwinvaneyk/goversion/pkg/extensions"
 )
 
 func New() *cobra.Command {

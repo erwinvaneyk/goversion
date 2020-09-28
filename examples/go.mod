@@ -2,6 +2,6 @@ module github.com/erwinvaneyk/goversioner/examples
 
 go 1.14
 
-replace github.com/erwinvaneyk/goversioner => ./../
+replace github.com/erwinvaneyk/goversion => ./../
 
-require github.com/erwinvaneyk/goversioner v1.0.0
+require github.com/erwinvaneyk/goversion v0.0.0

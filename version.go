@@ -1,5 +1,5 @@
-//go:generate goversion fields --goversion "" --pkg version -o version.gen.go
-package version
+//go:generate goversion fields --goversion "" --pkg goversion -o version.gen.go
+package goversion
 
 import (
 	"encoding/json"

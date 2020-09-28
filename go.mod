@@ -1,4 +1,4 @@
-module github.com/erwinvaneyk/go-version
+module github.com/erwinvaneyk/goversion
 
 go 1.13
 

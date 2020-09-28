@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/erwinvaneyk/go-version"
+	"github.com/erwinvaneyk/goversion"
 )
 
 func main() {
-	fmt.Println(version.Get())
+	fmt.Println(goversion.Get())
 }

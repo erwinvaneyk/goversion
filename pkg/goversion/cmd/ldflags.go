@@ -10,17 +10,17 @@ import (
 	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
 
-	"github.com/erwinvaneyk/go-version"
+	"github.com/erwinvaneyk/goversion"
 )
 
 type LDFlagsOptions struct {
-	Version     version.Info
+	Version     goversion.Info
 	PackageName string
 }
 
 func NewCmdLDFlags() *cobra.Command {
 	opts := &LDFlagsOptions{
-		PackageName: version.PackageName,
+		PackageName: goversion.PackageName,
 	}
 
 	cmd := &cobra.Command{
@@ -86,9 +86,9 @@ func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 		out, err := exec.Command("git", "diff", "--quiet").CombinedOutput()
 		if len(out) == 0 {
 			if err == nil {
-				o.Version.GitTreeState = version.GitTreeStateClean
+				o.Version.GitTreeState = goversion.GitTreeStateClean
 			} else {
-				o.Version.GitTreeState = version.GitTreeStateDirty
+				o.Version.GitTreeState = goversion.GitTreeStateDirty
 			}
 		}
 	}
