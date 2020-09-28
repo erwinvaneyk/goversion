@@ -7,8 +7,8 @@ import goversion "github.com/erwinvaneyk/goversion"
 var (
 	buildBy           string
 	buildDate         string
-	buildPlatformArch string
-	buildPlatformOS   string
+	buildArch string
+	buildOS   string
 	gitCommit         string
     gitTreeState      string
 	goVersion         string
@@ -17,13 +17,13 @@ var (
 
 func init() {
 	goversion.Set(goversion.Info{
-		BuildBy:           buildBy,
-		BuildDate:         buildDate,
-		BuildPlatformArch: buildPlatformArch,
-		BuildPlatformOS:   buildPlatformOS,
-		GitCommit:         gitCommit,
-        GitTreeState:      gitTreeState,
-		GoVersion:         goVersion,
-		Version:           version,
+		BuildBy:      buildBy,
+		BuildDate:    buildDate,
+		BuildArch:    buildArch,
+		BuildOS:      buildOS,
+		GitCommit:    gitCommit,
+        GitTreeState: gitTreeState,
+		GoVersion:    goVersion,
+		Version:      version,
 	})
 }

@@ -10,12 +10,12 @@ import (
 func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "goversion",
-		Short: "Generate linker flags and fields for versioning",
+		Short: "Generate linker flags and fields for versioning your Go applications.",
 	}
 
 	cmd.AddCommand(NewCmdLDFlags())
-	cmd.AddCommand(NewCmdFields())
-	cmd.AddCommand(extensions.NewCobraCmd())
+	cmd.AddCommand(NewCmdGenerate())
+	cmd.AddCommand(extensions.NewCobraCmdWithDefaults())
 
 	return cmd
 }

@@ -28,10 +28,16 @@ func NewCmdLDFlags() *cobra.Command {
 		Run: cobras.Run(opts),
 	}
 
-	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "")
+	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "The Go package that should be used in the ldflags.")
+
 	cmd.Flags().StringVar(&opts.Version.Version, "version", opts.Version.Version, "")
 	cmd.Flags().StringVar(&opts.Version.GitCommit, "git-commit", opts.Version.GitCommit, "")
+	cmd.Flags().StringVar(&opts.Version.GitCommit, "git-tree-state", opts.Version.GitTreeState, "")
+	cmd.Flags().StringVar(&opts.Version.GitCommit, "go-version", opts.Version.GoVersion, "")
 	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-date", opts.Version.BuildDate, "")
+	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-by", opts.Version.BuildBy, "")
+	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-arch", opts.Version.BuildArch, "")
+	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-os", opts.Version.BuildOS, "")
 
 	return cmd
 }
@@ -44,10 +50,11 @@ func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 			o.Version.BuildBy = strings.TrimSpace(string(out))
 		}
 
-		out, err = exec.Command("git", "config", "user.email").CombinedOutput()
-		if err == nil {
-			o.Version.BuildBy += fmt.Sprintf(" (%s)", strings.TrimSpace(string(out)))
-		}
+		// TODO
+		// out, err = exec.Command("git", "config", "user.email").CombinedOutput()
+		// if err == nil {
+		// 	o.Version.BuildBy += fmt.Sprintf(" (%s)", strings.TrimSpace(string(out)))
+		// }
 
 		o.Version.BuildBy = strings.TrimSpace(o.Version.BuildBy)
 	}
@@ -58,18 +65,18 @@ func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Infer build platform OS
-	if o.Version.BuildPlatformOS == "" {
+	if o.Version.BuildOS == "" {
 		out, err := exec.Command("uname").CombinedOutput()
 		if err == nil {
-			o.Version.BuildPlatformOS = strings.TrimSpace(string(out))
+			o.Version.BuildOS = strings.TrimSpace(string(out))
 		}
 	}
 
 	// Infer build platform architecture
-	if o.Version.BuildPlatformArch == "" {
+	if o.Version.BuildArch == "" {
 		out, err := exec.Command("uname", "-m").CombinedOutput()
 		if err == nil {
-			o.Version.BuildPlatformArch = strings.TrimSpace(string(out))
+			o.Version.BuildArch = strings.TrimSpace(string(out))
 		}
 	}
 
@@ -109,7 +116,7 @@ func (o *LDFlagsOptions) Validate() error {
 }
 
 func (o *LDFlagsOptions) Run(ctx context.Context) error {
-	fmt.Printf("-ldflags '%s'", o.Version.GenerateLDFlags(o.PackageName))
+	fmt.Printf("-ldflags '%s'", o.Version.ToLDFlags(o.PackageName))
 
 	return nil
 }

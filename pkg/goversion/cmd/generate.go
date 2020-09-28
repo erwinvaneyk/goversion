@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -14,7 +15,7 @@ import (
 	"github.com/erwinvaneyk/goversion"
 )
 
-type FieldsOptions struct {
+type GenerateOptions struct {
 	DisableInit              bool
 	GeneratedFilePath        string
 	GoVersionPackage         string
@@ -22,8 +23,8 @@ type FieldsOptions struct {
 	GoversionVersion         string
 }
 
-func NewCmdFields() *cobra.Command {
-	opts := &FieldsOptions{
+func NewCmdGenerate() *cobra.Command {
+	opts := &GenerateOptions{
 		GoVersionPackage:         goversion.PackageName,
 		GeneratedFilePath:        "",
 		GeneratedFilePackageName: "main",
@@ -31,26 +32,30 @@ func NewCmdFields() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use: "fields",
+		Use: "generate",
+		Short: "",
 		Run: cobras.Run(opts),
 	}
 
-	cmd.Flags().StringVarP(&opts.GeneratedFilePath, "output", "o", opts.GeneratedFilePath, "")
-	cmd.Flags().StringVarP(&opts.GeneratedFilePackageName, "pkg", "p", opts.GeneratedFilePackageName, "")
-	cmd.Flags().StringVar(&opts.GoVersionPackage, "goversion", opts.GoVersionPackage, "")
+	cmd.Flags().StringVarP(&opts.GeneratedFilePath, "output", "o", opts.GeneratedFilePath, "Where to write the generated version file to. If none or '-' is provided, it will be written to stdout.")
+	cmd.Flags().StringVarP(&opts.GeneratedFilePackageName, "pkg", "p", opts.GeneratedFilePackageName, "The package name of the generated file.")
+	cmd.Flags().StringVar(&opts.GoVersionPackage, "goversion", opts.GoVersionPackage, "The package path to use to import the goversion API.")
 	cmd.Flags().BoolVar(&opts.DisableInit, "disable-init", opts.DisableInit, "If set, the init function is not generated.")
 	return cmd
 }
 
-func (o *FieldsOptions) Complete(cmd *cobra.Command, args []string) error {
+func (o *GenerateOptions) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *FieldsOptions) Validate() error {
+func (o *GenerateOptions) Validate() error {
+	if o.GeneratedFilePackageName == "" {
+		return errors.New("a package name (--pkg, -p) is required")
+	}
 	return nil
 }
 
-func (o *FieldsOptions) Run(ctx context.Context) error {
+func (o *GenerateOptions) Run(ctx context.Context) error {
 	var writesToFile bool
 	var writer io.Writer
 	if o.GeneratedFilePath == "" || o.GeneratedFilePath == "-" {
@@ -88,26 +93,26 @@ import goversion "{{.GoVersionPackage}}"
 {{end}}
 // The following variables should be filled with goversion ldflags
 var (
-	buildBy           string
-	buildDate         string
-	buildPlatformArch string
-	buildPlatformOS   string
-	gitCommit         string
-    gitTreeState      string
-	goVersion         string
-	version           string
+	buildBy      string
+	buildDate    string
+	buildArch    string
+	buildOS      string
+	gitCommit    string
+	gitTreeState string
+	goVersion    string
+	version      string
 )
 
 {{if not .DisableInit}}func init() {
 	{{ if .GoVersionPackage}}goversion.{{end}}Set({{ if .GoVersionPackage}}goversion.{{end}}Info{
-		BuildBy:           buildBy,
-		BuildDate:         buildDate,
-		BuildPlatformArch: buildPlatformArch,
-		BuildPlatformOS:   buildPlatformOS,
-		GitCommit:         gitCommit,
-        GitTreeState:      gitTreeState,
-		GoVersion:         goVersion,
-		Version:           version,
+		BuildBy:      buildBy,
+		BuildDate:    buildDate,
+		BuildArch:    buildArch,
+		BuildOS:      buildOS,
+		GitCommit:    gitCommit,
+		GitTreeState: gitTreeState,
+		GoVersion:    goVersion,
+		Version:      version,
 	})
 }
 {{end}}`))

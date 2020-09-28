@@ -1,4 +1,4 @@
-//go:generate goversion fields -o version.gen.go
+//go:generate goversion generate -o version.gen.go
 package main
 
 import (
