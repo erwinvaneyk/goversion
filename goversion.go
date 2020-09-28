@@ -199,7 +199,7 @@ func AugmentFromEnv(info Info) Info {
 }
 
 func ValidateStrict(versionInfo Info) error {
-	fmt.Println(versionInfo.ToPrettyJSON())
+	// Check if all fields are set
 	infoType := reflect.ValueOf(versionInfo)
 	for i := 0; i < infoType.NumField(); i++ {
 		fieldType := infoType.Type().Field(i)
@@ -208,11 +208,25 @@ func ValidateStrict(versionInfo Info) error {
 		}
 	}
 
+	// Ensure that the git state is clean.
 	if versionInfo.GitTreeState == GitTreeStateDirty {
 		return errors.New("goversion requires a clean git tree state in strict mode")
 	}
 
-	// TODO validate date fields
+	// Validate the format of GitCommitDate timestamp.
+	if ts, err := time.Parse(time.RFC3339, versionInfo.GitCommitDate); err != nil {
+		return fmt.Errorf("date format in gitCommitDate is not a valid RFC3339 time: %v", err)
+	} else if !ts.UTC().Equal(ts) {
+		return errors.New("buildDate is not a UTC time")
+	}
+
+	// Validate the format of BuildDate timestamp.
+	if ts, err := time.Parse(time.RFC3339, versionInfo.BuildDate); err != nil {
+		return fmt.Errorf("date format in buildDate is not a a valid RFC3339 time: %v", err)
+	} else if !ts.UTC().Equal(ts) {
+		return errors.New("buildDate is not a UTC time")
+	}
+
 	return nil
 
 }
