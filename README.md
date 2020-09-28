@@ -160,3 +160,10 @@ func init() {
     // ...
 }
 ```
+
+### Reproducible Builds
+
+To make your builds, checksums, and signatures reproducible, you will need to 
+make the following modifications when generating the ldflags:
+- Manually set the `--build-date` to a specific date and time at which the build
+  should be done.

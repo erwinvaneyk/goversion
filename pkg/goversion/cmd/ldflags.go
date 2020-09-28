@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"reflect"
 	"strings"
 	"time"
 
@@ -30,14 +31,12 @@ func NewCmdLDFlags() *cobra.Command {
 
 	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "The Go package that should be used in the ldflags.")
 
-	cmd.Flags().StringVar(&opts.Version.Version, "version", opts.Version.Version, "")
-	cmd.Flags().StringVar(&opts.Version.GitCommit, "git-commit", opts.Version.GitCommit, "")
-	cmd.Flags().StringVar(&opts.Version.GitCommit, "git-tree-state", opts.Version.GitTreeState, "")
-	cmd.Flags().StringVar(&opts.Version.GitCommit, "go-version", opts.Version.GoVersion, "")
-	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-date", opts.Version.BuildDate, "")
-	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-by", opts.Version.BuildBy, "")
-	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-arch", opts.Version.BuildArch, "")
-	cmd.Flags().StringVar(&opts.Version.BuildDate, "build-os", opts.Version.BuildOS, "")
+	versionInfoVal := reflect.ValueOf(&opts.Version)
+	for i := 0; i < versionInfoVal.Elem().NumField(); i++ {
+		fieldVal := versionInfoVal.Elem().Field(i)
+		fieldType := versionInfoVal.Elem().Type().Field(i)
+		cmd.Flags().StringVar(fieldVal.Addr().Interface().(*string), camelCaseToKebabCase(fieldType.Name), fieldVal.String(), fmt.Sprintf("Manually set the '%s' field in the version info.", fieldType.Name))
+	}
 
 	return cmd
 }
@@ -88,6 +87,22 @@ func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Infer the git branch
+	if o.Version.GitBranch == "" {
+		out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").CombinedOutput()
+		if err == nil {
+			o.Version.GitBranch = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Infer the git commit date
+	if o.Version.GitCommitDate == "" && o.Version.GitCommit != "" {
+		out, err := exec.Command("git", "show", "-s", "--format=%ci", o.Version.GitCommit).CombinedOutput()
+		if err == nil {
+			o.Version.GitCommitDate = strings.TrimSpace(string(out))
+		}
+	}
+
 	// Infer git status
 	if o.Version.GitTreeState == "" {
 		out, err := exec.Command("git", "diff", "--quiet").CombinedOutput()
@@ -119,4 +134,26 @@ func (o *LDFlagsOptions) Run(ctx context.Context) error {
 	fmt.Printf("-ldflags '%s'", o.Version.ToLDFlags(o.PackageName))
 
 	return nil
+}
+
+// camelCaseToKebabCase converts a camelCaseVariableName or PascalCaseVariableName to its kebab-case-variable-name equivalent.
+func camelCaseToKebabCase(pascalCaseName string) string {
+	if pascalCaseName == "" {
+		return ""
+	}
+	kebabCaseName := []rune(strings.ToLower(pascalCaseName[0:1]))
+	var prevCharWasUppercase bool
+	for _, c := range []rune(pascalCaseName[1:]) {
+		if c >= 'A' && c <= 'Z' {
+			if !prevCharWasUppercase {
+				kebabCaseName = append(kebabCaseName, '-')
+				prevCharWasUppercase = true
+			}
+			kebabCaseName = append(kebabCaseName, c + 'a' - 'A')
+		} else {
+			prevCharWasUppercase = false
+			kebabCaseName = append(kebabCaseName, c)
+		}
+	}
+	return string(kebabCaseName)
 }

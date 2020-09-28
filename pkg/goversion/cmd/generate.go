@@ -3,10 +3,14 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
+	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/erwinvaneyk/cobras"
@@ -16,11 +20,13 @@ import (
 )
 
 type GenerateOptions struct {
-	DisableInit              bool
-	GeneratedFilePath        string
-	GoVersionPackage         string
-	GeneratedFilePackageName string
-	GoversionVersion         string
+	DisableInit                   bool
+	GeneratedFilePath             string
+	GoVersionPackage              string
+	GeneratedFilePackageName      string
+	GoversionVersion              string
+	GeneratedVersionPrivateFields string
+	GeneratedVersionSetFields     string
 }
 
 func NewCmdGenerate() *cobra.Command {
@@ -32,9 +38,9 @@ func NewCmdGenerate() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use: "generate",
+		Use:   "generate",
 		Short: "",
-		Run: cobras.Run(opts),
+		Run:   cobras.Run(opts),
 	}
 
 	cmd.Flags().StringVarP(&opts.GeneratedFilePath, "output", "o", opts.GeneratedFilePath, "Where to write the generated version file to. If none or '-' is provided, it will be written to stdout.")
@@ -45,6 +51,24 @@ func NewCmdGenerate() *cobra.Command {
 }
 
 func (o *GenerateOptions) Complete(cmd *cobra.Command, args []string) error {
+	versionInfoVal := reflect.ValueOf(goversion.Get()).Type()
+	var longestFieldNameLen int
+	for i := 0; i < versionInfoVal.NumField(); i++ {
+		nameLen := len(versionInfoVal.Field(i).Name)
+		fmt.Println(nameLen)
+		if nameLen > longestFieldNameLen {
+			longestFieldNameLen = nameLen
+		}
+	}
+	for i := 0; i < versionInfoVal.NumField(); i++ {
+		fieldType := versionInfoVal.Field(i)
+		lowerCaseFieldName := strings.ToLower(fieldType.Name[0:1]) + strings.ToLower(fieldType.Name[1:])
+		o.GeneratedVersionPrivateFields += fmt.Sprintf("\t%-" + strconv.Itoa(longestFieldNameLen)  + "s %s\n", lowerCaseFieldName, fieldType.Type)
+		o.GeneratedVersionSetFields += fmt.Sprintf("\t\t%-" + strconv.Itoa(longestFieldNameLen + 1) + "s %s,\n", fieldType.Name + ":", lowerCaseFieldName)
+	}
+	o.GeneratedVersionPrivateFields = strings.TrimSpace(o.GeneratedVersionPrivateFields)
+	o.GeneratedVersionSetFields = strings.TrimSpace(o.GeneratedVersionSetFields)
+
 	return nil
 }
 
@@ -93,26 +117,12 @@ import goversion "{{.GoVersionPackage}}"
 {{end}}
 // The following variables should be filled with goversion ldflags
 var (
-	buildBy      string
-	buildDate    string
-	buildArch    string
-	buildOS      string
-	gitCommit    string
-	gitTreeState string
-	goVersion    string
-	version      string
+	{{.GeneratedVersionPrivateFields}}
 )
 
 {{if not .DisableInit}}func init() {
 	{{ if .GoVersionPackage}}goversion.{{end}}Set({{ if .GoVersionPackage}}goversion.{{end}}Info{
-		BuildBy:      buildBy,
-		BuildDate:    buildDate,
-		BuildArch:    buildArch,
-		BuildOS:      buildOS,
-		GitCommit:    gitCommit,
-		GitTreeState: gitTreeState,
-		GoVersion:    goVersion,
-		Version:      version,
+		{{.GeneratedVersionSetFields}}
 	})
 }
 {{end}}`))

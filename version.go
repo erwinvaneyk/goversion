@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/ghodss/yaml"
@@ -28,7 +29,7 @@ type Info struct {
 	// Version is the semantic version of the application.
 	Version string `json:"version"`
 
-	// BuildDate contains the date and time when the binary was built.
+	// BuildDate contains the UNIX date and/or time when the binary was built.
 	BuildDate string `json:"buildDate"`
 
 	// BuildArch is the system architecture that was used to build the binary.
@@ -43,8 +44,14 @@ type Info struct {
 	// GoVersion the go version that was used to build the binary.
 	GoVersion string `json:"goVersion"`
 
-	// GitCommit is the HEAD commit at the moment of building
+	// GitCommit is the HEAD commit at the moment of building.
 	GitCommit string `json:"gitCommit"`
+
+	// GitCommitDate contains the timestamp of the GitCommit.
+	GitCommitDate string `json:"gitCommitTimestamp"`
+
+	// GitBranch is the git branch that was checked out at time of building.
+	GitBranch string `json:"gitBranch"`
 
 	// GitTreeState indicates whether there where uncommitted changes when the binary was built.
 	//
@@ -95,32 +102,15 @@ func (i Info) ToPrettyJSON() string {
 }
 
 func (i Info) ToLDFlags(pkg string) string {
-	var flags string
-	if i.BuildBy != "" {
-		flags += generateLDFlag(pkg, "buildBy", i.BuildBy) + " "
+	var flags []string
+	structVal := reflect.ValueOf(i)
+	for i := 0; i < structVal.NumField(); i++ {
+		field := structVal.Field(i)
+		fieldName := structVal.Type().Field(i).Name
+		privateFieldName := strings.ToLower(fieldName[0:1]) + fieldName[1:]
+		flags = append(flags, generateLDFlag(pkg, privateFieldName, field.String()))
 	}
-	if i.BuildDate != "" {
-		flags += generateLDFlag(pkg, "buildDate", i.BuildDate) + " "
-	}
-	if i.BuildArch != "" {
-		flags += generateLDFlag(pkg, "buildArch", i.BuildArch) + " "
-	}
-	if i.BuildOS != "" {
-		flags += generateLDFlag(pkg, "buildOS", i.BuildOS) + " "
-	}
-	if i.GitCommit != "" {
-		flags += generateLDFlag(pkg, "gitCommit", i.GitCommit) + " "
-	}
-	if i.GitTreeState != "" {
-		flags += generateLDFlag(pkg, "gitTreeState", i.GitTreeState) + " "
-	}
-	if i.GoVersion != "" {
-		flags += generateLDFlag(pkg, "goVersion", i.GoVersion)
-	}
-	if i.Version != "" {
-		flags += generateLDFlag(pkg, "version", i.Version) + " "
-	}
-	return flags
+	return strings.Join(flags, " ")
 }
 
 func Set(updatedVersion Info) {
