@@ -39,7 +39,7 @@ goversion ldflags --version v1.2.3 --pkg main
 # Print ldflags in strict mode.
 goversion ldflags 					# Should fail, because it is missing the version.
 goversion ldflags --version v1.0.1 	# Should succeed.`,
-		Run:   cobras.Run(opts),
+		Run: cobras.Run(opts),
 	}
 
 	cmd.Flags().StringVarP(&opts.PackageName, "pkg", "p", opts.PackageName, "The Go package that should be used in the ldflags.")

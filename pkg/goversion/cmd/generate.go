@@ -48,8 +48,8 @@ goversion generate --pkg main
 goversion generate --pkg my.custom.pkg -o my/custom/pkg/custom_version.gen.go
 		
 # Add the generate command as a go generate tag to one of your files
-//go:generate goversion generate -o version.gen.go --pkg my.custom.pkg`,
-		Run:   cobras.Run(opts),
+ //go:generate goversion generate -o version.gen.go --pkg my.custom.pkg`,
+		Run: cobras.Run(opts),
 	}
 
 	cmd.Flags().StringVarP(&opts.GeneratedFilePath, "output", "o", opts.GeneratedFilePath, "Where to write the generated version file to. If none or '-' is provided, it will be written to stdout.")
