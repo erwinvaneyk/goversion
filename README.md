@@ -21,7 +21,16 @@ To install the optional `goversion` CLI, use one of the following options:
 
 ### Using a pre-built release to get the goversion CLI
 
-TODO
+To download a stable release of goversion, see the 
+[Github Releases](https://github.com/erwinvaneyk/goversion/releases). For 
+example, to download the latest version run the following: 
+
+```bash
+VERSION=v0.1.0 # Change to get an older version.
+wget https://github.com/erwinvaneyk/goversion/releases/download/v${VERSION}/goversion_$(echo $VERSION | sed 's/v//')_$(uname)_$(uname -m).tar.gz -O goversion.tar.gz
+tar -xvf goversion.tar.gz
+sudo mv ./goversion /usr/local/bin/goversion 
+```
 
 ### Using Go tools to get the goversion CLI
 
