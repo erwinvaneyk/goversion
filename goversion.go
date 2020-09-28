@@ -1,12 +1,12 @@
-//go:generate goversion generate --goversion "" --pkg goversion -o goversion.gen.go
 package goversion
 
 import (
 	"encoding/json"
 	"fmt"
+	"os/exec"
 	"reflect"
 	"strings"
-	"sync"
+	"time"
 
 	"github.com/ghodss/yaml"
 )
@@ -16,12 +16,6 @@ const (
 	GitTreeStateClean = "clean"
 )
 
-var (
-	versionInfoMu = &sync.RWMutex{}
-	PackageName   = reflect.TypeOf(versionInfo).PkgPath()
-	versionInfo   Info
-)
-
 // Info contains all the version-related information.
 //
 // TODO add version parsing and comparing.
@@ -29,7 +23,7 @@ type Info struct {
 	// Version is the semantic version of the application.
 	Version string `json:"version"`
 
-	// BuildDate contains the UNIX date and/or time when the binary was built.
+	// BuildDate contains the RFC3339 timestamp of when the binary was built.
 	BuildDate string `json:"buildDate"`
 
 	// BuildArch is the system architecture that was used to build the binary.
@@ -47,7 +41,7 @@ type Info struct {
 	// GitCommit is the HEAD commit at the moment of building.
 	GitCommit string `json:"gitCommit"`
 
-	// GitCommitDate contains the timestamp of the GitCommit.
+	// GitCommitDate contains the RFC3339 timestamp of the GitCommit.
 	GitCommitDate string `json:"gitCommitDate"`
 
 	// GitBranch is the git branch that was checked out at time of building.
@@ -113,21 +107,93 @@ func (i Info) ToLDFlags(pkg string) string {
 	return strings.Join(flags, " ")
 }
 
-func Set(updatedVersion Info) {
-	if updatedVersion.IsEmpty() {
-		return
-	}
-	versionInfoMu.Lock()
-	defer versionInfoMu.Unlock()
-	versionInfo = updatedVersion
-}
+// AugmentFromEnv will try to infer versioning information from the local environment and augment the Info struct with it.
+func AugmentFromEnv(info Info) Info {
+	// Infer build by
+	if info.BuildBy == "" {
+		out, err := exec.Command("git", "config", "user.name").CombinedOutput()
+		if err == nil {
+			info.BuildBy = strings.TrimSpace(string(out))
+		}
 
-func Get() Info {
-	versionInfoMu.RLock()
-	defer versionInfoMu.RUnlock()
-	return versionInfo
+		// Note: disabled for now, because it might be too easy to unintentionally distribute the email.
+		// out, err = exec.Command("git", "config", "user.email").CombinedOutput()
+		// if err == nil {
+		// 	info.BuildBy += fmt.Sprintf(" (%s)", strings.TrimSpace(string(out)))
+		// }
+
+		info.BuildBy = strings.TrimSpace(info.BuildBy)
+	}
+
+	// Infer the build date
+	if info.BuildDate == "" {
+		info.BuildDate = time.Now().UTC().Format(time.RFC3339)
+	}
+
+	// Infer build platform OS
+	if info.BuildOS == "" {
+		out, err := exec.Command("uname").CombinedOutput()
+		if err == nil {
+			info.BuildOS = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Infer build platform architecture
+	if info.BuildArch == "" {
+		out, err := exec.Command("uname", "-m").CombinedOutput()
+		if err == nil {
+			info.BuildArch = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Infer the git commit
+	if info.GitCommit == "" {
+		out, err := exec.Command("git", "rev-parse", "HEAD").CombinedOutput()
+		if err == nil {
+			info.GitCommit = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Infer the git branch
+	if info.GitBranch == "" {
+		out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").CombinedOutput()
+		if err == nil {
+			info.GitBranch = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Infer the git commit date
+	if info.GitCommitDate == "" && info.GitCommit != "" {
+		out, err := exec.Command("git", "show", "-s", "--format=%ci", info.GitCommit).CombinedOutput()
+		if err == nil {
+			info.GitCommitDate = strings.TrimSpace(string(out))
+		}
+	}
+
+	// Infer git status
+	if info.GitTreeState == "" {
+		out, err := exec.Command("git", "diff", "--quiet").CombinedOutput()
+		if len(out) == 0 {
+			if err == nil {
+				info.GitTreeState = GitTreeStateClean
+			} else {
+				info.GitTreeState = GitTreeStateDirty
+			}
+		}
+	}
+
+	// Infer go version
+	if info.GoVersion == "" {
+		out, err := exec.Command("go", "version").CombinedOutput()
+		if err == nil {
+			info.GoVersion = strings.Split(strings.TrimSpace(string(out)), " ")[2]
+		}
+	}
+
+	return info
 }
 
 func generateLDFlag(pkg string, field string, val string) string {
 	return fmt.Sprintf("-X \"%s.%s=%s\"", pkg, field, val)
 }
+

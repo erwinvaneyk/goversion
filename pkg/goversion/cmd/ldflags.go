@@ -3,10 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/erwinvaneyk/cobras"
 	"github.com/spf13/cobra"
@@ -47,87 +45,7 @@ func NewCmdLDFlags() *cobra.Command {
 }
 
 func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Infer build by
-	if o.Version.BuildBy == "" {
-		out, err := exec.Command("git", "config", "user.name").CombinedOutput()
-		if err == nil {
-			o.Version.BuildBy = strings.TrimSpace(string(out))
-		}
-
-		// TODO
-		// out, err = exec.Command("git", "config", "user.email").CombinedOutput()
-		// if err == nil {
-		// 	o.Version.BuildBy += fmt.Sprintf(" (%s)", strings.TrimSpace(string(out)))
-		// }
-
-		o.Version.BuildBy = strings.TrimSpace(o.Version.BuildBy)
-	}
-
-	// Infer the build date
-	if o.Version.BuildDate == "" {
-		o.Version.BuildDate = time.Now().UTC().Format(time.RFC3339)
-	}
-
-	// Infer build platform OS
-	if o.Version.BuildOS == "" {
-		out, err := exec.Command("uname").CombinedOutput()
-		if err == nil {
-			o.Version.BuildOS = strings.TrimSpace(string(out))
-		}
-	}
-
-	// Infer build platform architecture
-	if o.Version.BuildArch == "" {
-		out, err := exec.Command("uname", "-m").CombinedOutput()
-		if err == nil {
-			o.Version.BuildArch = strings.TrimSpace(string(out))
-		}
-	}
-
-	// Infer the git commit
-	if o.Version.GitCommit == "" {
-		out, err := exec.Command("git", "rev-parse", "HEAD").CombinedOutput()
-		if err == nil {
-			o.Version.GitCommit = strings.TrimSpace(string(out))
-		}
-	}
-
-	// Infer the git branch
-	if o.Version.GitBranch == "" {
-		out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").CombinedOutput()
-		if err == nil {
-			o.Version.GitBranch = strings.TrimSpace(string(out))
-		}
-	}
-
-	// Infer the git commit date
-	if o.Version.GitCommitDate == "" && o.Version.GitCommit != "" {
-		out, err := exec.Command("git", "show", "-s", "--format=%ci", o.Version.GitCommit).CombinedOutput()
-		if err == nil {
-			o.Version.GitCommitDate = strings.TrimSpace(string(out))
-		}
-	}
-
-	// Infer git status
-	if o.Version.GitTreeState == "" {
-		out, err := exec.Command("git", "diff", "--quiet").CombinedOutput()
-		if len(out) == 0 {
-			if err == nil {
-				o.Version.GitTreeState = goversion.GitTreeStateClean
-			} else {
-				o.Version.GitTreeState = goversion.GitTreeStateDirty
-			}
-		}
-	}
-
-	// Infer go version
-	if o.Version.GoVersion == "" {
-		out, err := exec.Command("go", "version").CombinedOutput()
-		if err == nil {
-			o.Version.GoVersion = strings.Split(strings.TrimSpace(string(out)), " ")[2]
-		}
-	}
-
+	o.Version = goversion.AugmentFromEnv(o.Version)
 	return nil
 }
 
