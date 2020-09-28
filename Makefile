@@ -55,6 +55,7 @@ tools: ## Install all required tools
 
 .PHONY: release
 release: clean generate verify test ## Build and release goversion, publishing the artifacts on Github and Dockerhub.
+	# Before this command tag the current commit: `git tag -a v0.1.2 -m v0.1.2`
 	GOVERSION_LDFLAGS="$(shell goversion ldflags --print-ldflag=false --version=${VERSION} --strict)" goreleaser release --rm-dist
 
 print-%: ## Print any of the variables defined in the Makefile.

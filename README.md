@@ -27,7 +27,7 @@ example, to download the latest version run the following:
 
 ```bash
 # Change to get an older version.
-VERSION=v0.1.1
+VERSION=v0.1.2
 
 # Download goversion
 curl -L https://github.com/erwinvaneyk/goversion/releases/download/${VERSION}/goversion_$(echo $VERSION | sed 's/v//')_$(uname)_$(uname -m).tar.gz > goversion.tar.gz
