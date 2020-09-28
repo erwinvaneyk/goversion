@@ -1,6 +1,6 @@
 # Go-version
 
-Simplify versioning of Go applications.
+Simplified versioning for Go applications.
 
 The project consists out of two parts:
 1. The version library `github.com/erwinvaneyk/goversion` for providing version
@@ -10,26 +10,59 @@ The project consists out of two parts:
    
 ## Installation
 
-TODO go get
+To use this library in your Go project, all you need to do is in the context of 
+the project:
 
-TODO section
+```bash
+go get -u github.com/erwinvaneyk/goversion
+```
 
 To install the optional `goversion` CLI, use one of the following options:
 
-### Using a pre-built release
+### Using a pre-built release to get the goversion CLI
 
 TODO
 
-### Using Go tools
+### Using Go tools to get the goversion CLI
 
+To pin your project to a specific version of `goversion`, add the following 
+`tools.go` file to your (module-enabled) Go project:
+```go
+// +build tools
 
+//go:generate go install github.com/erwinvaneyk/goversion
+package main
 
-### Using Go install (deprecated)
+import (
+	_ "github.com/erwinvaneyk/goversion"
+)
+```
+The first time, run the following to add `goversion` as dependency to your project:
 ```bash
-GO11MODULE=off go install github.com/erwinvaneyk/goversion/cmd/goversion 
+go get -u github.com/erwinvaneyk/goversion/cmd/goversion
+```
+
+Finally, to install the binary on your path  run the go generator on this file:
+```bash
+go generate -tags=tools ./tools.go
 ```
 
 Note: ensure that you have added your `GOBIN` directory to your `PATH`.
+
+### Build the goversion CLI from source
+
+To build and install the CLI from source, clone the repo and run `make`:
+```
+git clone git@github.com:erwinvaneyk/goversion.git
+cd goversion
+
+# Builds goversion and stores it in the ./bin directory.
+make goversion
+
+# Build and add goversion to your PATH.
+# Note: ensure that you have added your `GOBIN` directory to your `PATH`.
+make install
+```
 
 ## Usage
 

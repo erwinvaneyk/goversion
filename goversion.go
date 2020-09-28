@@ -227,11 +227,10 @@ func ValidateStrict(versionInfo Info) error {
 		return errors.New("buildDate is not a UTC time")
 	}
 
+	// TODO validate that Version is a semantic version
 	return nil
-
 }
 
 func generateLDFlag(pkg string, field string, val string) string {
 	return fmt.Sprintf("-X \"%s.%s=%s\"", pkg, field, val)
 }
-

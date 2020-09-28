@@ -13,7 +13,7 @@
 
 //go:generate go install github.com/goreleaser/goreleaser
 //go:generate go install golang.org/x/tools/cmd/goimports
-package goversion
+package tools
 
 import (
 	_ "github.com/goreleaser/goreleaser"
