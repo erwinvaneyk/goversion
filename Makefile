@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-VERSION := $(shell git describe --abbrev=0 2>/dev/null)-SNAPSHOT
+VERSION := $(shell git describe --abbrev=0 2>/dev/null)
 PATH  := $(PWD)/bin:$(PATH)
 SHELL := env PATH=$(PATH) /bin/bash
 TOOLS_DIR := hack/tools
@@ -14,7 +14,7 @@ build: goversion ## Build goversion.
 .PHONY: goversion
 goversion:
 	@shell which goversion &>/dev/null || go build -o ./bin/goversion ./cmd/goversion
-	go build $(shell goversion ldflags --version ${VERSION}) -o ./bin/goversion ./cmd/goversion
+	go build $(shell goversion ldflags --version ${VERSION}-SNAPSHOT) -o ./bin/goversion ./cmd/goversion
 
 .PHONY: clean
 clean: ## Clean up all build and release-related resources.

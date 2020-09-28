@@ -28,10 +28,21 @@ func NewCmdLDFlags() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ldflags",
 		Short: "Collect version information from host and print as valid Go ldflags.",
+		Example: `
+# Print ldflags with a version.
+goversion ldflags --version v1.0.4
+
+# Print ldflags with a custom package prefix. This is useful when you have 
+# generated a custom version file. See 'goversion generate'.
+goversion ldflags --version v1.2.3 --pkg main
+		
+# Print ldflags in strict mode.
+goversion ldflags 					# Should fail, because it is missing the version.
+goversion ldflags --version v1.0.1 	# Should succeed.`,
 		Run:   cobras.Run(opts),
 	}
 
-	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "The Go package that should be used in the ldflags.")
+	cmd.Flags().StringVarP(&opts.PackageName, "pkg", "p", opts.PackageName, "The Go package that should be used in the ldflags.")
 	cmd.Flags().BoolVar(&opts.PrintLDFlag, "print-ldflag", opts.PrintLDFlag, "If set, the flags will be wrapped with the '-ldflags' flag.")
 	cmd.Flags().BoolVar(&opts.Strict, "strict", opts.Strict, "If set, goversion will validate the version info before writing the ldflags.")
 

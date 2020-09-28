@@ -39,7 +39,16 @@ func NewCmdGenerate() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "generate",
-		Short: "",
+		Short: "Generate a version file to customize the import path in ldflags.",
+		Example: `
+# Generate a version file for the main package and print to stdout
+goversion generate --pkg main
+		
+# Generate a version file for a custom package and save the output to a file.
+goversion generate --pkg my.custom.pkg -o my/custom/pkg/custom_version.gen.go
+		
+# Add the generate command as a go generate tag to one of your files
+//go:generate goversion generate -o version.gen.go --pkg my.custom.pkg`,
 		Run:   cobras.Run(opts),
 	}
 
