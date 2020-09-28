@@ -55,16 +55,15 @@ func (o *GenerateOptions) Complete(cmd *cobra.Command, args []string) error {
 	var longestFieldNameLen int
 	for i := 0; i < versionInfoVal.NumField(); i++ {
 		nameLen := len(versionInfoVal.Field(i).Name)
-		fmt.Println(nameLen)
 		if nameLen > longestFieldNameLen {
 			longestFieldNameLen = nameLen
 		}
 	}
 	for i := 0; i < versionInfoVal.NumField(); i++ {
 		fieldType := versionInfoVal.Field(i)
-		lowerCaseFieldName := strings.ToLower(fieldType.Name[0:1]) + strings.ToLower(fieldType.Name[1:])
-		o.GeneratedVersionPrivateFields += fmt.Sprintf("\t%-" + strconv.Itoa(longestFieldNameLen)  + "s %s\n", lowerCaseFieldName, fieldType.Type)
-		o.GeneratedVersionSetFields += fmt.Sprintf("\t\t%-" + strconv.Itoa(longestFieldNameLen + 1) + "s %s,\n", fieldType.Name + ":", lowerCaseFieldName)
+		lowerCaseFieldName := strings.ToLower(fieldType.Name[0:1]) + fieldType.Name[1:]
+		o.GeneratedVersionPrivateFields += fmt.Sprintf("\t%-"+strconv.Itoa(longestFieldNameLen)+"s %s\n", lowerCaseFieldName, fieldType.Type)
+		o.GeneratedVersionSetFields += fmt.Sprintf("\t\t%-"+strconv.Itoa(longestFieldNameLen+1)+"s %s,\n", fieldType.Name+":", lowerCaseFieldName)
 	}
 	o.GeneratedVersionPrivateFields = strings.TrimSpace(o.GeneratedVersionPrivateFields)
 	o.GeneratedVersionSetFields = strings.TrimSpace(o.GeneratedVersionSetFields)

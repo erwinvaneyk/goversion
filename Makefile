@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-VERSION := "v0.1.0-SNAPSHOT"
+VERSION := $(shell git describe --abbrev=0 2>/dev/null || echo "v0.0.0-SNAPSHOT")
 PATH  := $(PWD)/bin:$(PATH)
 SHELL := env PATH=$(PATH) /bin/bash
 
@@ -47,4 +47,4 @@ format: ## Run all formatters on the codebase.
 
 .PHONY: release
 release: clean generate verify test ## Build and release goversion, publishing the artifacts on Github and Dockerhub.
-	goreleaser release --rm-dist --skip-publish
+	GOVERSION_LDFLAGS=$(shell goversion ldflags --print-ldflag=false --version=${VERSION}) goreleaser release --rm-dist --skip-publish --snapshot --debug

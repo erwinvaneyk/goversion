@@ -1,23 +1,25 @@
 builds:
-- id: goversion
-  binary: goversion
-  main: ./cmd/goversion
-  env:
-  - CGO_ENABLED=0
-  - GO111MODULE=on
+  - id: goversion
+    binary: goversion
+    main: ./cmd/goversion
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    ldflags:
+      - "{{.Env.GOVERSION_LDFLAGS}}" # Inject the goversion-generated LDFlags through environment variables.
 archives:
-# Use values used by `uname` (OS) and `uname -m` (architecture).
-- id: default
-  name_template: "goversion_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-  builds:
-    - goversion
-  replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
-  files:
+  - id: default
+    name_template: "goversion_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    builds:
+      - goversion
+    # Use values used by `uname` (OS) and `uname -m` (architecture).
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    files:
 checksum:
   name_template: 'checksums.txt'
   algorithm: sha256
@@ -27,8 +29,8 @@ changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+      - '^docs:'
+      - '^test:'
 dockers:
   - dockerfile: Dockerfile
     goos: linux

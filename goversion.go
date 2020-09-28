@@ -48,7 +48,7 @@ type Info struct {
 	GitCommit string `json:"gitCommit"`
 
 	// GitCommitDate contains the timestamp of the GitCommit.
-	GitCommitDate string `json:"gitCommitTimestamp"`
+	GitCommitDate string `json:"gitCommitDate"`
 
 	// GitBranch is the git branch that was checked out at time of building.
 	GitBranch string `json:"gitBranch"`

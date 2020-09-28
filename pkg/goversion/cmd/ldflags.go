@@ -17,20 +17,24 @@ import (
 type LDFlagsOptions struct {
 	Version     goversion.Info
 	PackageName string
+	PrintLDFlag bool
 }
 
 func NewCmdLDFlags() *cobra.Command {
 	opts := &LDFlagsOptions{
 		PackageName: goversion.PackageName,
+		PrintLDFlag: true,
 	}
 
 	cmd := &cobra.Command{
-		Use: "ldflags",
+		Use:   "ldflags",
 		Short: "Collect version information from host and print as valid Go ldflags.",
-		Run: cobras.Run(opts),
+		Run:   cobras.Run(opts),
 	}
 
 	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "The Go package that should be used in the ldflags.")
+	cmd.Flags().BoolVar(&opts.PrintLDFlag, "print-ldflag", opts.PrintLDFlag, "If set, the flags will be wrapped with the '-ldflags' flag")
+	// TODO strict mode
 
 	versionInfoVal := reflect.ValueOf(&opts.Version)
 	for i := 0; i < versionInfoVal.Elem().NumField(); i++ {
@@ -120,7 +124,7 @@ func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 	if o.Version.GoVersion == "" {
 		out, err := exec.Command("go", "version").CombinedOutput()
 		if err == nil {
-			o.Version.GoVersion = strings.TrimSpace(string(out))
+			o.Version.GoVersion = strings.Split(strings.TrimSpace(string(out)), " ")[2]
 		}
 	}
 
@@ -132,7 +136,13 @@ func (o *LDFlagsOptions) Validate() error {
 }
 
 func (o *LDFlagsOptions) Run(ctx context.Context) error {
-	fmt.Printf("-ldflags '%s'", o.Version.ToLDFlags(o.PackageName))
+	if o.PrintLDFlag {
+		fmt.Print("-ldflags '")
+	}
+	fmt.Printf("%s", o.Version.ToLDFlags(o.PackageName))
+	if o.PrintLDFlag {
+		fmt.Print("'")
+	}
 
 	return nil
 }
@@ -150,7 +160,7 @@ func camelCaseToKebabCase(pascalCaseName string) string {
 				kebabCaseName = append(kebabCaseName, '-')
 				prevCharWasUppercase = true
 			}
-			kebabCaseName = append(kebabCaseName, c + 'a' - 'A')
+			kebabCaseName = append(kebabCaseName, c+'a'-'A')
 		} else {
 			prevCharWasUppercase = false
 			kebabCaseName = append(kebabCaseName, c)

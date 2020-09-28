@@ -31,14 +31,6 @@ GO11MODULE=off go install github.com/erwinvaneyk/goversion/cmd/goversion
 
 Note: ensure that you have added your `GOBIN` directory to your `PATH`.
 
-### Using Docker
-If you prefer using a Docker container, rather than a local binary, add the 
-following to your shell config (e.g. `~/.bashrc` or `~/.zshrc`):
-
-```bash
-alias goversion="docker run --rm erwinvaneyk/goversion:latest"
-```
-
 ## Usage
 
 There are two ways to make use of `goversion` in your project. Both assume 
@@ -68,14 +60,15 @@ func main() {
 
 
 ```bash
-go run -ldflags ' \
-		-X "github.com/erwinvaneyk/goversion.version=v1.0.0" \
-		-X "github.com/erwinvaneyk/goversion.gitCommit=$(shell git rev-parse HEAD)" \
-		-X "github.com/erwinvaneyk/goversion.buildDate=$(shell date)"' \
-	    ./simple
-
-# Or with goversion
+# With goversion:
 go run $(goversion ldflags --version v1.0.1) ./simple
+
+# Or, manually:
+go run -ldflags ' \
+		-X "github.com/erwinvaneyk/goversion.version=v1.0.1" \
+		-X "github.com/erwinvaneyk/goversion.gitCommit=$(git rev-parse HEAD)" \
+		-X "github.com/erwinvaneyk/goversion.buildDate=$(date)"' \
+	    ./simple
 ```
 
 ### Using generated fields
@@ -133,14 +126,15 @@ Using the generated code, you can now set the ldflags using the shorter
 `main` instead of the full package name:
  
 ```bash
+# With goversion:
+go run $(goversion ldflags --pkg main --version v1.0.4) ./generated 
+
+# Or, manually:
 go run -ldflags ' \
     		-X "main.version=v1.0.3" \
-    		-X "main.gitCommit=$(shell git rev-parse HEAD)" \
-    		-X "main.buildDate=$(shell date)"' \
+    		-X "main.gitCommit=$(git rev-parse HEAD)" \
+    		-X "main.buildDate=$(date)"' \
     		./generated
-
-# Or with goversion
-go run $(goversion ldflags --pkg main --version v1.0.4) ./generated 
 ```
 
 See the [examples](./examples) for complete, functioning examples.

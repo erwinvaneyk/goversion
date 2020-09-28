@@ -3,25 +3,29 @@ package goversion
 
 // The following variables should be filled with goversion ldflags
 var (
-	buildBy      string
-	buildDate    string
-	buildArch    string
-	buildOS      string
-	gitCommit    string
-	gitTreeState string
-	goVersion    string
-	version      string
+	version       string
+	buildDate     string
+	buildArch     string
+	buildOS       string
+	buildBy       string
+	goVersion     string
+	gitCommit     string
+	gitCommitDate string
+	gitBranch     string
+	gitTreeState  string
 )
 
 func init() {
 	Set(Info{
-		BuildBy:      buildBy,
-		BuildDate:    buildDate,
-		BuildArch:    buildArch,
-		BuildOS:      buildOS,
-		GitCommit:    gitCommit,
-		GitTreeState: gitTreeState,
-		GoVersion:    goVersion,
-		Version:      version,
+		Version:       version,
+		BuildDate:     buildDate,
+		BuildArch:     buildArch,
+		BuildOS:       buildOS,
+		BuildBy:       buildBy,
+		GoVersion:     goVersion,
+		GitCommit:     gitCommit,
+		GitCommitDate: gitCommitDate,
+		GitBranch:     gitBranch,
+		GitTreeState:  gitTreeState,
 	})
 }

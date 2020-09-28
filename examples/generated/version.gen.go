@@ -5,14 +5,14 @@ import goversion "github.com/erwinvaneyk/goversion"
 
 // The following variables should be filled with goversion ldflags
 var (
-	buildBy           string
-	buildDate         string
-	buildArch string
-	buildOS   string
-	gitCommit         string
-    gitTreeState      string
-	goVersion         string
-	version           string
+	buildBy      string
+	buildDate    string
+	buildArch    string
+	buildOS      string
+	gitCommit    string
+	gitTreeState string
+	goVersion    string
+	version      string
 )
 
 func init() {
@@ -22,7 +22,7 @@ func init() {
 		BuildArch:    buildArch,
 		BuildOS:      buildOS,
 		GitCommit:    gitCommit,
-        GitTreeState: gitTreeState,
+		GitTreeState: gitTreeState,
 		GoVersion:    goVersion,
 		Version:      version,
 	})
