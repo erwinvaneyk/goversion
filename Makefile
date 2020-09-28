@@ -27,19 +27,23 @@ generate: ## Run all code generators
 
 .PHONY: test
 test: ## Run all unit tests.
-	go test ./...
+	go test -v ./...
 
 .PHONY: verify
-verify: ## Run all code analysis tools and linters.
+verify: ## Run all static analysis checks.
 	# Check if codebase is formatted.
-	@echo "gofmt -l ."
-	@bash -c "[ -z $$(gofmt -l .) ] && echo 'OK' || (echo 'ERROR: files are not formatted:' && gofmt -l . && false)"
+	@which goimports > /dev/null || ! echo 'goimports not found'
+	@bash -c "[ -z \"$(goimports -l cmd pkg)\" ] && echo 'OK' || (echo 'ERROR: files are not formatted:' && goimports -l cmd pkg && echo -e \"\nRun 'make format' or manually fix the formatting issues.\n\" && false)"
 	# Run static checks on codebase.
-	go vet ./...
+	go vet ./cmd/... ./pkg/...
 
 .PHONY: format
 format: ## Run all formatters on the codebase.
-	go fmt ./...
+	# Format the Go codebase.
+	goimports -w cmd pkg
+
+	# Format the go.mod file.
+	go mod tidy
 
 .PHONY: release
 release: clean generate verify test ## Build and release goversion, publishing the artifacts on Github and Dockerhub.

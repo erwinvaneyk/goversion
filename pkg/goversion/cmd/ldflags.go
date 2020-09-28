@@ -26,6 +26,7 @@ func NewCmdLDFlags() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "ldflags",
+		Short: "Collect version information from host and print as valid Go ldflags.",
 		Run: cobras.Run(opts),
 	}
 

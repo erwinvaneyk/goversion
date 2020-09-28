@@ -23,7 +23,8 @@ TODO
 ### Using Go tools
 
 
-### Using Go install
+
+### Using Go install (deprecated)
 ```bash
 GO11MODULE=off go install github.com/erwinvaneyk/goversion/cmd/goversion 
 ```

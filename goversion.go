@@ -1,4 +1,4 @@
-//go:generate goversion generate --goversion "" --pkg goversion -o version.gen.go
+//go:generate goversion generate --goversion "" --pkg goversion -o goversion.gen.go
 package goversion
 
 import (
