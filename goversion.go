@@ -2,6 +2,7 @@ package goversion
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"reflect"
@@ -23,7 +24,7 @@ type Info struct {
 	// Version is the semantic version of the application.
 	Version string `json:"version"`
 
-	// BuildDate contains the RFC3339 timestamp of when the binary was built.
+	// BuildDate contains the RFC3339 timestamp normalized to UTC of when the binary was built.
 	BuildDate string `json:"buildDate"`
 
 	// BuildArch is the system architecture that was used to build the binary.
@@ -41,7 +42,7 @@ type Info struct {
 	// GitCommit is the HEAD commit at the moment of building.
 	GitCommit string `json:"gitCommit"`
 
-	// GitCommitDate contains the RFC3339 timestamp of the GitCommit.
+	// GitCommitDate contains the RFC3339 timestamp normalized to UTC of the GitCommit.
 	GitCommitDate string `json:"gitCommitDate"`
 
 	// GitBranch is the git branch that was checked out at time of building.
@@ -130,7 +131,7 @@ func AugmentFromEnv(info Info) Info {
 		info.BuildDate = time.Now().UTC().Format(time.RFC3339)
 	}
 
-	// Infer build platform OS
+	// Infer build OS
 	if info.BuildOS == "" {
 		out, err := exec.Command("uname").CombinedOutput()
 		if err == nil {
@@ -138,7 +139,7 @@ func AugmentFromEnv(info Info) Info {
 		}
 	}
 
-	// Infer build platform architecture
+	// Infer build architecture
 	if info.BuildArch == "" {
 		out, err := exec.Command("uname", "-m").CombinedOutput()
 		if err == nil {
@@ -166,7 +167,11 @@ func AugmentFromEnv(info Info) Info {
 	if info.GitCommitDate == "" && info.GitCommit != "" {
 		out, err := exec.Command("git", "show", "-s", "--format=%ci", info.GitCommit).CombinedOutput()
 		if err == nil {
-			info.GitCommitDate = strings.TrimSpace(string(out))
+			// Convert git format (2020-09-28 16:30:29 +0200) to RFC3339 (2006-01-02T15:04:05Z07:00)
+			gitCommitDate, err := time.Parse("2006-01-02 15:04:05 -0700", strings.TrimSpace(string(out)))
+			if err == nil {
+				info.GitCommitDate = gitCommitDate.UTC().Format(time.RFC3339)
+			}
 		}
 	}
 
@@ -191,6 +196,25 @@ func AugmentFromEnv(info Info) Info {
 	}
 
 	return info
+}
+
+func ValidateStrict(versionInfo Info) error {
+	fmt.Println(versionInfo.ToPrettyJSON())
+	infoType := reflect.ValueOf(versionInfo)
+	for i := 0; i < infoType.NumField(); i++ {
+		fieldType := infoType.Type().Field(i)
+		if infoType.Field(i).IsZero() {
+			return errors.New("field is required in strict mode: " + fieldType.Name)
+		}
+	}
+
+	if versionInfo.GitTreeState == GitTreeStateDirty {
+		return errors.New("goversion requires a clean git tree state in strict mode")
+	}
+
+	// TODO validate date fields
+	return nil
+
 }
 
 func generateLDFlag(pkg string, field string, val string) string {

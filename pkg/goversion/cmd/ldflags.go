@@ -16,6 +16,7 @@ type LDFlagsOptions struct {
 	Version     goversion.Info
 	PackageName string
 	PrintLDFlag bool
+	Strict      bool
 }
 
 func NewCmdLDFlags() *cobra.Command {
@@ -31,8 +32,8 @@ func NewCmdLDFlags() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&opts.PackageName, "pkg", opts.PackageName, "The Go package that should be used in the ldflags.")
-	cmd.Flags().BoolVar(&opts.PrintLDFlag, "print-ldflag", opts.PrintLDFlag, "If set, the flags will be wrapped with the '-ldflags' flag")
-	// TODO strict mode
+	cmd.Flags().BoolVar(&opts.PrintLDFlag, "print-ldflag", opts.PrintLDFlag, "If set, the flags will be wrapped with the '-ldflags' flag.")
+	cmd.Flags().BoolVar(&opts.Strict, "strict", opts.Strict, "If set, goversion will validate the version info before writing the ldflags.")
 
 	versionInfoVal := reflect.ValueOf(&opts.Version)
 	for i := 0; i < versionInfoVal.Elem().NumField(); i++ {
@@ -50,6 +51,9 @@ func (o *LDFlagsOptions) Complete(cmd *cobra.Command, args []string) error {
 }
 
 func (o *LDFlagsOptions) Validate() error {
+	if o.Strict {
+		return goversion.ValidateStrict(o.Version)
+	}
 	return nil
 }
 

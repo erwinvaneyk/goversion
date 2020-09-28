@@ -47,4 +47,4 @@ format: ## Run all formatters on the codebase.
 
 .PHONY: release
 release: clean generate verify test ## Build and release goversion, publishing the artifacts on Github and Dockerhub.
-	GOVERSION_LDFLAGS=$(shell goversion ldflags --print-ldflag=false --version=${VERSION}) goreleaser release --rm-dist --skip-publish --snapshot --debug
+	GOVERSION_LDFLAGS=$(shell goversion ldflags --print-ldflag=false --version=${VERSION} --strict) goreleaser release --rm-dist --skip-publish --snapshot --debug
