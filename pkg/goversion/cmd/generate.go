@@ -77,6 +77,10 @@ func (o *GenerateOptions) Complete(cmd *cobra.Command, args []string) error {
 	o.GeneratedVersionPrivateFields = strings.TrimSpace(o.GeneratedVersionPrivateFields)
 	o.GeneratedVersionSetFields = strings.TrimSpace(o.GeneratedVersionSetFields)
 
+	if o.GoversionVersion == "" {
+		o.GoversionVersion = "unversioned"
+	}
+
 	return nil
 }
 

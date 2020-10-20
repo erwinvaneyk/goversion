@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-VERSION := $(shell git describe --abbrev=0 2>/dev/null)
+VERSION := $(shell git describe --abbrev=0 2>/dev/null || echo v0.0.0)
 PATH  := $(PWD)/bin:$(PATH)
 SHELL := env PATH=$(PATH) /bin/bash
 TOOLS_DIR := hack/tools
@@ -56,6 +56,9 @@ tools: ## Install all required tools
 .PHONY: release
 release: clean generate verify test ## Build and release goversion, publishing the artifacts on Github and Dockerhub.
 	# Before this command tag the current commit: `git tag -a v0.1.2 -m v0.1.2`
+	#
+	# Validate goversion by running it in strict mode
+	goversion ldflags --print-ldflag=false --version=${VERSION} --strict > /dev/null
 	GOVERSION_LDFLAGS="$(shell goversion ldflags --print-ldflag=false --version=${VERSION} --strict)" goreleaser release --rm-dist
 
 print-%: ## Print any of the variables defined in the Makefile.
