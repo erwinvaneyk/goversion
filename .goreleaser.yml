@@ -1,3 +1,5 @@
+release:
+  prerelease: auto
 builds:
   - id: goversion
     binary: goversion
